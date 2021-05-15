@@ -1,7 +1,12 @@
 import "./App.css";
+import Input from "./components/input";
 
 function App() {
-  return <div className="App">Placeholder text</div>;
+  return (
+    <div className="App">
+      <Input />
+    </div>
+  );
 }
 
 export default App;
