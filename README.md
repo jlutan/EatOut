@@ -2,6 +2,17 @@
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+## Development
+
+Steps:
+
+1. Run `npm install` to install dependencies.
+2. Run `npx kendo-ui-license activate` to activate Kendo.
+
+- Make sure this is done in the project's root directory.
+
+3. Run `npm start` to start the development server.
+
 ## Available Scripts
 
 In the project directory, you can run:
