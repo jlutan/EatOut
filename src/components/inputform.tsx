@@ -1,7 +1,17 @@
 import React, { Component } from "react";
 import { Form, Field, FormElement } from "@progress/kendo-react-form";
-import { Error } from "@progress/kendo-react-labels";
-import { Input } from "@progress/kendo-react-inputs";
+import { Label, Error } from "@progress/kendo-react-labels";
+import {
+  Input,
+  SliderChangeEvent,
+  RangeSliderChangeEvent,
+} from "@progress/kendo-react-inputs";
+import { CustomSlider, CustomRangeSlider } from "./sliders";
+
+export interface Range {
+  start: number;
+  end: number;
+}
 
 export interface State {
   location?: string;
@@ -9,7 +19,7 @@ export interface State {
   categories?: string;
   limit?: number;
   sort_by?: string;
-  price?: string;
+  price?: Range;
   open_now?: boolean;
 }
 
@@ -19,32 +29,50 @@ class InputForm extends Component<State> {
       location: "",
       radius: 1000, // measured in meters
       categories: "restaurants", // always include restaurant
-      limit: 15,
+      limit: 15, // # of results to display
       sort_by: "best_match",
-      price: "1, 2",
+      price: { start: 1, end: 2 }, // price range (1-cheap, 3-expensive)
       // open_now: true
     },
   };
 
   categories = [""];
 
-  handleSubmit = (data: any) => {
+  handleSubmit = (
+    data: any,
+    event: React.SyntheticEvent<any> | undefined
+  ): void => {
+    if (typeof event !== "undefined") event.preventDefault();
     console.log(JSON.stringify(data, null, 2));
-    this.setState(JSON.parse(data, undefined));
+    this.setState({ query: JSON.parse(JSON.stringify(data), undefined) });
+  };
+
+  // change radius slider
+  onRadiusChange = (e: SliderChangeEvent) => {
+    const query = { ...this.state.query };
+    query.radius = e.value;
+    this.setState({ query });
+  };
+
+  // change price slider
+  onPriceChange = (e: RangeSliderChangeEvent) => {
+    const query = { ...this.state.query };
+    query.price = { start: e.value.start, end: e.value.end };
+    this.setState({ query });
   };
 
   render() {
-    const {
-      query: { location, radius, categories, limit, sort_by, price },
-    } = this.state;
+    const { radius, price } = this.state.query;
 
     return (
       <Form
         onSubmit={this.handleSubmit}
-        render={(formRenderProps) => (
+        render={(formRenderProps: any) => (
           <FormElement>
             <fieldset className="k-form-fieldset">
-              <legend className="k-form-legend">Describe your query:</legend>
+              <legend className="k-form-legend">
+                Describe your restaurant search:
+              </legend>
               <div className="mb-3">
                 <Field
                   autoFocus
@@ -54,11 +82,18 @@ class InputForm extends Component<State> {
                 />
               </div>
               <div className="mb-3">
+                <Label editorId="radius">Radius</Label>
                 <Field
+                  id="radius"
                   name="radius"
-                  type="range"
-                  component={Input}
-                  label="Radius"
+                  component={CustomSlider}
+                  onChange={this.onRadiusChange}
+                  value={radius}
+                  min={0}
+                  max={1000}
+                  step={20}
+                  defaultValue={100}
+                  positions={[0, 250, 500, 750, 1000]}
                 ></Field>
               </div>
               <div className="mb-3">
@@ -75,11 +110,19 @@ class InputForm extends Component<State> {
                 <Field name="sort-by" component={Input} label="Sort By"></Field>
               </div>
               <div className="mb-3">
+                <Label editorId="price">Price</Label>
                 <Field
+                  id="price"
                   name="price"
                   type="range"
-                  component={Input}
-                  label="Price"
+                  component={CustomRangeSlider}
+                  onChange={this.onPriceChange}
+                  value={price}
+                  min={1}
+                  max={3}
+                  step={1}
+                  defaultValue={{ start: 1, end: 1 }}
+                  positions={[1, 2, 3]}
                 ></Field>
               </div>
             </fieldset>
@@ -91,19 +134,6 @@ class InputForm extends Component<State> {
           </FormElement>
         )}
       />
-      // <form>
-      //   <label>Location: </label>
-      //   <input title="Location" type="text"></input>
-      //   <label>Search Radius: </label>
-      //   <input title="Search Radius" type="range"></input>
-      //   <label>Categories: </label>
-      //   <input title="Categories" type="text"></input>
-      //   <label>Sort By: </label>
-      //   <input title="Sort By" type="text"></input>
-      //   <label>Price Range: </label>
-      //   <input title="Price Range" type="range"></input>
-      //   <input type="submit"></input>
-      // </form>
     );
   }
 }
