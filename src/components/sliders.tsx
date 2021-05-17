@@ -34,7 +34,7 @@ const CustomSlider: React.FunctionComponent<CustomSliderProps> = ({
       value={value}
       onChange={onChange}
       step={step}
-      defaultValue={defaultValue || 100 <= max ? 100 : min}
+      defaultValue={defaultValue}
       min={min}
       max={max}
     >
