@@ -11,93 +11,142 @@ import {
   RadioGroupChangeEvent,
   RadioGroup,
 } from "@progress/kendo-react-inputs";
+import {
+  MultiSelect,
+  MultiSelectChangeEvent,
+} from "@progress/kendo-react-dropdowns";
 import { CustomSlider, CustomRangeSlider } from "./sliders";
+import { getSorts, getCategories } from "../lib";
 
 import "./styles/inputform.css";
+
+const YELP_API_TOKEN: String =
+  "5cSbPPrTn0Gr0446_jXm8UakTo0XTmr7xheg_VMBJ143tkLylG9Uri800onLWiHv9BZHRlwKSjgv2rzv4mTIsX4I2d5qXBLBQYp7Ado-cwj-VbqBx5keAQwEJLWhYHYx";
 
 interface Range {
   start: number;
   end: number;
 }
 
-export interface State {
+export interface InputFormState {
   query: {
     [key: string]: any; // set index signatures to strings
     location?: string;
     radius?: number;
-    categories?: string;
+    categories?: Array<Object>;
     limit?: number;
     sort_by?: string;
     price?: Range;
     open_now?: boolean;
   };
+  result: Object;
 }
 
-class InputForm extends Component<State> {
-  state: State = {
+class InputForm extends Component<InputFormState> {
+  state: InputFormState = {
     query: {
       location: "",
       radius: 5, // measured in kilometers
-      categories: "restaurants", // always include restaurant
+      categories: [], // always include restaurant
       limit: 15, // # of results to display
       sort_by: "best_match",
       price: { start: 1, end: 2 }, // price range (1-cheap, 4-expensive)
       // open_now: true
     },
+    result: {},
   };
 
   xhttp: XMLHttpRequest = new XMLHttpRequest();
-  categories: Array<string> = [""];
-  sorts: Array<Object> = [
-    {
-      label: "Best Match",
-      value: "best_match",
-    },
-    {
-      label: "Rating",
-      value: "rating",
-    },
-    {
-      label: "Review Count",
-      value: "review_count",
-    },
-    {
-      label: "Distance",
-      value: "distance",
-    },
-  ];
+  categoryList: Array<Object> = [];
+  sorts: Array<Object> = [];
 
   /* Lifecycle Hooks */
 
   componentDidMount() {
+    // initialize members
+    this.categoryList = getCategories();
+    this.sorts = getSorts();
+
     // Using AJAX to make http requests
     const xhttp = this.xhttp;
     xhttp.responseType = "json";
     // fires whenever the status of the object changes
     xhttp.onreadystatechange = () => {
+      // activates when request is done and HTTP status is OK
       if (xhttp.readyState === 4 && xhttp.status === 200) {
         // returns the server response as a JSON object
         console.log(xhttp.response);
+        this.setState({ result: xhttp.response });
       }
     };
   }
 
+  // defines a GET request to the Yelp API
+  getRestaurants = async (url: RequestInfo): Promise<JSON> => {
+    // calling the fetch API
+    const response = await fetch(url, {
+      method: "GET",
+      mode: "cors",
+      cache: "no-cache",
+      credentials: "same-origin",
+      headers: {
+        Authorization: `Bearer ${YELP_API_TOKEN}`,
+      },
+    });
+    return response.json();
+  };
+
   /* Event Handlers */
 
-  handleSubmit = (
+  // Sends a request to the Yelp API and saves the result to the state
+  handleSubmit = async (
     data: any,
     event: React.SyntheticEvent<any> | undefined
-  ): void => {
+  ): Promise<void> => {
     if (typeof event !== "undefined") event.preventDefault();
 
-    this.setState({ query: JSON.parse(JSON.stringify(data), undefined) });
+    const query = { ...this.state.query };
 
-    console.log(JSON.stringify(data, null, 2));
-    // call Yelp API
-    // initialize new request
-    this.xhttp.open("GET", "https://api.yelp.com/v3/businesses/search");
-    // send the request to the internet
-    // this.xhttp.send();
+    let queryString = "";
+    for (const param in query) {
+      let paramString = param.toString() + '="';
+      if (query && param === "price") {
+        const el: Array<Number> = [];
+        if (query.price) {
+          for (let i = query.price.start; i <= query.price.end; i++) {
+            el.push(i);
+          }
+        }
+        paramString += el.join(",");
+      } else if (param === "radius") {
+        if (query.radius) paramString += query.radius * 1000;
+      } else if (param === "categories") {
+      } else {
+        paramString += query[param];
+      }
+      queryString += paramString + '"&';
+    }
+    console.log(queryString);
+
+    this.getRestaurants(
+      `https://api.yelp.com/v3/businesses/search?${queryString}`
+    )
+      .then((data) => console.log(data))
+      .catch((reason) => console.log(reason));
+    // if (this.xhttp.withCredentials) {
+    //   // initialize the request
+    //   this.xhttp.open(
+    //     "GET",
+    //     `https://api.yelp.com/v3/businesses/search?${queryString}`
+    //   );
+    //   // set authorization token in the request header
+    //   this.xhttp.setRequestHeader("Authorization", `Bearer ${YELP_API_TOKEN}`);
+    //   this.xhttp.setRequestHeader("Access-Control-Allow-Origin", "*");
+
+    //   // send the request to the internet
+    //   // after firing, the onreadystatechange listener will process the data once the request is done
+    //   this.xhttp.send();
+    // }
   };
 
   // update text inputs
@@ -122,20 +171,32 @@ class InputForm extends Component<State> {
   };
 
   // update categories
-  onCategoriesChange = (e: InputChangeEvent): void => {};
+  onMultiSelectChange = (e: MultiSelectChangeEvent): void => {
+    const query = { ...this.state.query };
+    if (e.target.name) query[e.target.name] = e.value;
+    this.setState({ query });
+  };
 
-  // update radius input
+  // update slider input
   onSliderChange = (e: SliderChangeEvent): void => {
     const query = { ...this.state.query };
     if (e.target.props.name) query[e.target.props.name] = e.value;
     this.setState({ query });
   };
 
-  // update price input
+  // update range slider input
   onRangeChange = (e: RangeSliderChangeEvent): void => {
     const query = { ...this.state.query };
-    if (e.target.props.name)
-      query[e.target.props.name] = { start: e.value.start, end: e.value.end };
+    if (e.target.props.name) {
+      if (e.target.props.name === "price")
+        query[e.target.props.name] = {
+          start: Math.round(e.value.start),
+          end: Math.round(e.value.end),
+        };
+      else
+        query[e.target.props.name] = { start: e.value.start, end: e.value.end };
+    }
+
     this.setState({ query });
   };
 
@@ -144,15 +205,18 @@ class InputForm extends Component<State> {
     const { location, radius, categories, limit, sort_by, price } =
       this.state.query;
 
+    const categoriesValue: Array<String> = [];
+    categories?.forEach((category) =>
+      categoriesValue.push(category.toString())
+    );
+
     return (
       <Form
         onSubmit={this.handleSubmit}
         render={(formRenderProps: any) => (
           <FormElement>
             <fieldset className="k-form-fieldset">
-              <legend className="k-form-legend">
-                Describe your restaurant search:
-              </legend>
+              <legend className="k-form-legend">Describe your search:</legend>
               <div className="mb-3">
                 <Field
                   autoFocus
@@ -160,7 +224,7 @@ class InputForm extends Component<State> {
                   onChange={this.onTextChange}
                   value={location}
                   component={Input}
-                  label="Location"
+                  label="Location (City, Street, Zip code, etc.)"
                 />
               </div>
               <div className="mb-3">
@@ -178,13 +242,15 @@ class InputForm extends Component<State> {
                 ></Field>
               </div>
               <div className="mb-3">
-                <Field
-                  name="categories"
-                  component={Input}
-                  value={categories}
-                  defaultValue={"restaurants"}
+                <MultiSelect
                   label="Categories"
-                ></Field>
+                  name="categories"
+                  data={this.categoryList}
+                  textField="text"
+                  dataItemKey="id"
+                  onChange={this.onMultiSelectChange}
+                  value={categories}
+                />
               </div>
               <div className="mb-3">
                 <Field
