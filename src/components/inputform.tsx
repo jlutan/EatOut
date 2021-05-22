@@ -20,6 +20,7 @@ import { getSorts, getCategories } from "../lib";
 
 import "./styles/inputform.css";
 
+// WARNING: bad practice
 const YELP_API_TOKEN: String =
   "5cSbPPrTn0Gr0446_jXm8UakTo0XTmr7xheg_VMBJ143tkLylG9Uri800onLWiHv9BZHRlwKSjgv2rzv4mTIsX4I2d5qXBLBQYp7Ado-cwj-VbqBx5keAQwEJLWhYHYx";
 
@@ -28,7 +29,10 @@ interface Range {
   end: number;
 }
 
+export interface InputFormProps {}
+
 export interface InputFormState {
+  status: number; // 0 - no data ready, 1 - request in progress, 2 - request done and ready
   query: {
     [key: string]: any; // set index signatures to strings
     location?: string;
@@ -42,13 +46,14 @@ export interface InputFormState {
   result: Object;
 }
 
-class InputForm extends Component<InputFormState> {
+class InputForm extends Component<InputFormProps, InputFormState> {
   state: InputFormState = {
+    status: 0,
     query: {
       location: "",
       radius: 5, // measured in kilometers
       categories: [], // always include restaurant
-      limit: 15, // # of results to display
+      limit: 20, // # of results to display
       sort_by: "best_match",
       price: { start: 1, end: 2 }, // price range (1-cheap, 4-expensive)
       // open_now: true
@@ -109,7 +114,7 @@ class InputForm extends Component<InputFormState> {
 
     let queryString = "";
     for (const param in query) {
-      let paramString = param.toString() + '="';
+      let paramString = param.toString() + "=";
       if (query && param === "price") {
         const el: Array<Number> = [];
         if (query.price) {
@@ -119,20 +124,39 @@ class InputForm extends Component<InputFormState> {
         }
         paramString += el.join(",");
       } else if (param === "radius") {
-        if (query.radius) paramString += query.radius * 1000;
+        if (query.radius) paramString += Math.round(query.radius * 1000);
       } else if (param === "categories") {
+        // TODO
+      } else if (typeof query[param] === "string") {
+        const tokens = query[param].split(" ");
+        if (tokens.length > 1) {
+          paramString += '"' + tokens.join(" ") + '"';
+        } else {
+          paramString += query[param];
+        }
       } else {
         paramString += query[param];
       }
-      queryString += paramString + '"&';
+      queryString += paramString + "&";
     }
-    console.log(queryString);
 
+    // send request to proxy server
     this.getRestaurants(
-      `https://api.yelp.com/v3/businesses/search?${queryString}`
+      `https://cors-anywhere.herokuapp.com/api.yelp.com/v3/businesses/search?${queryString}`
     )
-      .then((data) => console.log(data))
-      .catch((reason) => console.log(reason));
+      .then(
+        (value) => {
+          this.setState({ status: 2, result: value });
+        },
+        (reason) => {
+          console.log(reason);
+          this.setState({ status: 0 });
+        }
+      )
+      .catch((reason) => {
+        console.log(reason);
+        this.setState({ status: 0 });
+      });
     // if (this.xhttp.withCredentials) {
     //   // initialize the request
     //   this.xhttp.open(
@@ -258,7 +282,7 @@ class InputForm extends Component<InputFormState> {
                   component={NumericTextBox}
                   onChange={this.onNumberChange}
                   value={limit}
-                  defaultValue={15}
+                  defaultValue={20}
                   min={1}
                   max={200}
                   step={1}
