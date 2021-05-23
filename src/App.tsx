@@ -8,7 +8,8 @@ import {
   RadioGroupChangeEvent,
 } from "@progress/kendo-react-inputs";
 import { MultiSelectChangeEvent } from "@progress/kendo-react-dropdowns";
-import { getSorts, getCategories } from "./lib";
+import { getSorts, getCategories, toCategoryValue } from "./yelp-lib";
+import Results from "./components/results";
 
 import "./App.css";
 
@@ -27,14 +28,18 @@ interface AppState {
     [key: string]: any; // set index signatures to strings
     location: string;
     radius: number;
-    categories: Array<Object>;
+    categories: Array<String>;
     limit: number;
     sort_by: string;
     price: Range;
     open_at?: number;
     open_now?: boolean;
   };
-  result: Object;
+  result: {
+    [key: string]: any;
+    total: number;
+    businesses: Array<Object>;
+  };
 }
 
 class App extends Component<AppState> {
@@ -49,7 +54,10 @@ class App extends Component<AppState> {
       price: { start: 1, end: 2 }, // price range (1-cheap, 4-expensive)
       // open_now: true
     },
-    result: {},
+    result: {
+      total: 0,
+      businesses: [],
+    },
   };
 
   // defines a GET request to the Yelp API
@@ -82,17 +90,23 @@ class App extends Component<AppState> {
     for (const param in query) {
       let paramString = param.toString() + "=";
       if (query && param === "price") {
-        const el: Array<Number> = [];
         if (query.price) {
+          const prices: Array<Number> = [];
           for (let i = query.price.start; i <= query.price.end; i++) {
-            el.push(i);
+            prices.push(i);
           }
+          paramString += prices.join(",");
         }
-        paramString += el.join(",");
       } else if (param === "radius") {
         if (query.radius) paramString += Math.round(query.radius * 1000);
       } else if (param === "categories") {
-        // TODO
+        if (query.categories) {
+          const cat: Array<String> = [];
+          for (let category of query.categories) {
+            cat.push(toCategoryValue(category));
+          }
+          paramString += cat.join(",");
+        }
       } else if (typeof query[param] === "string") {
         const tokens = query[param].split(" ");
         if (tokens.length > 1) {
@@ -194,7 +208,7 @@ class App extends Component<AppState> {
     return (
       <div className="App">
         {this.state.status === 2 ? (
-          <div>Result ready, generating list.</div>
+          <Results result={this.state.result} />
         ) : (
           <InputForm
             handleSubmit={this.handleSubmit}

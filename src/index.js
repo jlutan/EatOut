@@ -23,9 +23,9 @@ import reportWebVitals from "./reportWebVitals";
 
 // render main application
 ReactDOM.render(
-  <React.StrictMode>
+  <React.Fragment>
     <App />
-  </React.StrictMode>,
+  </React.Fragment>,
   document.getElementById("root")
 );
 

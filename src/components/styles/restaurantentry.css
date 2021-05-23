@@ -1,0 +1,23 @@
+.restaurant-entry {
+  padding: 0.6rem;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  border: solid thin #cccccc;
+}
+
+.restaurant-entry img {
+  border-radius: 30px;
+}
+
+.restaurant-entry .info {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.restaurant-entry .info * {
+  margin: 0;
+}

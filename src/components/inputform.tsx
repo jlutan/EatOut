@@ -30,12 +30,12 @@ export interface InputFormProps {
   onSliderChange: (event: any) => void;
   onRangeChange: (event: any) => void;
   // form state
-  sorts: Array<Object>;
-  categoryList: Array<Object>;
+  sorts: Array<{ label: String; value: String }>;
+  categoryList: Array<String>;
   query: {
     location: String;
     radius: number;
-    categories: Array<Object>;
+    categories: Array<String>;
     limit: number;
     sort_by: String;
     price: Range;
@@ -93,9 +93,8 @@ const InputForm: FunctionComponent<InputFormProps> = (props) => {
               <MultiSelect
                 label="Categories"
                 name="categories"
+                allowCustom={true}
                 data={categoryList}
-                textField="text"
-                dataItemKey="id"
                 onChange={onMultiSelectChange}
                 value={categories}
               />
@@ -108,7 +107,7 @@ const InputForm: FunctionComponent<InputFormProps> = (props) => {
                 value={limit}
                 defaultValue={20}
                 min={1}
-                max={200}
+                max={50}
                 step={1}
                 label="Result Limit"
               ></Field>
@@ -120,6 +119,7 @@ const InputForm: FunctionComponent<InputFormProps> = (props) => {
                 component={RadioGroup}
                 disabled={false}
                 onChange={onSortChange}
+                defaultValue={sorts[0].value}
                 value={sort_by}
                 data={sorts}
                 label="Sort By"
