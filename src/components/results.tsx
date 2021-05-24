@@ -8,29 +8,51 @@ import {
   Filter,
   Operators,
   TextFilter,
+  FilterChangeEvent,
 } from "@progress/kendo-react-data-tools";
-import { filterBy } from "@progress/kendo-data-query";
+import {
+  filterBy,
+  CompositeFilterDescriptor,
+} from "@progress/kendo-data-query";
 import RestaurantEntry from "./restaurantentry";
+import { ResultsType } from "../yelp-lib";
+
 import "./styles/results.css";
 
-interface FilterType {}
+/*
+  Filter Operators
+  ==================
+  Numeric values:
+  gt - greater than
+  lt - less than
+  eq - equal to
 
-const initialFilter: FilterType = {
+  String values:
+  contains - contains substring
+*/
+
+const initialFilter: CompositeFilterDescriptor = {
   logic: "and",
-  filters: [],
+  filters: [
+    {
+      field: "transactions",
+      operator: "contains",
+      value: "restaurant_reservation",
+    },
+  ],
 };
 
 export interface ResultsProps {
-  result: {
-    [key: string]: any;
-    total: number;
-    businesses: Array<Object>;
-  };
+  result: ResultsType;
 }
 
 const Results: FunctionComponent<ResultsProps> = ({ result }) => {
   const [businesses, setBusinesses] = useState(result.businesses);
   const [filter, setFilter] = useState(initialFilter);
+
+  const onFilterChange = (event: FilterChangeEvent) => {
+    setFilter(event.filter);
+  };
 
   const Header: FunctionComponent = () => {
     return (
@@ -40,7 +62,27 @@ const Results: FunctionComponent<ResultsProps> = ({ result }) => {
     );
   };
 
-  return <ListView header={Header} data={businesses} item={RestaurantEntry} />;
+  return (
+    <React.Fragment>
+      <Filter
+        value={filter}
+        onChange={onFilterChange}
+        fields={[
+          {
+            name: "transactions",
+            label: "Transactions",
+            filter: TextFilter,
+            operators: Operators.text,
+          },
+        ]}
+      />
+      <ListView
+        header={Header}
+        data={filterBy(businesses, filter)}
+        item={RestaurantEntry}
+      />
+    </React.Fragment>
+  );
 };
 
 export default Results;

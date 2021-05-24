@@ -1,3 +1,46 @@
+type TransactionValue = "pickup" | "delivery" | "restaurant_reservation";
+
+export interface Business {
+  name: string;
+  phone: string;
+  display_phone: string;
+  distance: number;
+  price: string;
+  rating: number;
+  review_count: number;
+  url: string;
+  transactions: Array<TransactionValue>;
+  location: {
+    address1: string;
+    address2?: string;
+    address3?: string;
+    city: string;
+    country: string;
+    display_address: Array<string>;
+    state: string;
+    zip_code: string;
+  };
+  categories: Array<{
+    alias: string;
+    title: string;
+  }>;
+  coordinates: {
+    latitude: number;
+    longitude: number;
+  };
+  id: string;
+  alias: string;
+  image_url: string;
+  is_closed: boolean;
+  region?: any;
+}
+
+export interface ResultsType {
+  [key: string]: any;
+  total: number;
+  businesses: Array<Business>;
+}
+
 interface Categories {
   [key: string]: string;
 }

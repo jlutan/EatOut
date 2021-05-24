@@ -8,7 +8,12 @@ import {
   RadioGroupChangeEvent,
 } from "@progress/kendo-react-inputs";
 import { MultiSelectChangeEvent } from "@progress/kendo-react-dropdowns";
-import { getSorts, getCategories, toCategoryValue } from "./yelp-lib";
+import {
+  ResultsType,
+  getSorts,
+  getCategories,
+  toCategoryValue,
+} from "./yelp-lib";
 import Results from "./components/results";
 
 import "./App.css";
@@ -34,11 +39,7 @@ interface AppState {
     open_at?: number;
     open_now?: boolean;
   };
-  result: {
-    [key: string]: any;
-    total: number;
-    businesses: Array<Object>;
-  };
+  result: ResultsType;
 }
 
 class App extends Component<AppState> {
@@ -126,7 +127,7 @@ class App extends Component<AppState> {
     )
       .then(
         (value) => {
-          this.setState({ status: 2, result: value });
+          this.setState({ status: 2, result: value as unknown as ResultsType });
         },
         (reason) => {
           console.log(reason);
