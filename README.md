@@ -11,7 +11,7 @@ Steps:
 3. Generate a kendu-ui-license.txt file and extract it to the project root folder. Run `npx kendo-ui-license activate` to activate Kendo React.
 4. Visit [Cors Anywhere](https://cors-anywhere.herokuapp.com/) and click the button to enable the proxy server in your browser.
 
-- Important: Do this in the browser where you are testing from
+**Important:** Do this in the browser where you are testing from
 
 4. Run `npm start` to start the development server.
 
