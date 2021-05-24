@@ -4,8 +4,21 @@ import {
   ListViewHeader,
   ListViewFooter,
 } from "@progress/kendo-react-listview";
+import {
+  Filter,
+  Operators,
+  TextFilter,
+} from "@progress/kendo-react-data-tools";
+import { filterBy } from "@progress/kendo-data-query";
 import RestaurantEntry from "./restaurantentry";
 import "./styles/results.css";
+
+interface FilterType {}
+
+const initialFilter: FilterType = {
+  logic: "and",
+  filters: [],
+};
 
 export interface ResultsProps {
   result: {
@@ -17,6 +30,7 @@ export interface ResultsProps {
 
 const Results: FunctionComponent<ResultsProps> = ({ result }) => {
   const [businesses, setBusinesses] = useState(result.businesses);
+  const [filter, setFilter] = useState(initialFilter);
 
   const Header: FunctionComponent = () => {
     return (

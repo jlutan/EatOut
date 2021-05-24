@@ -28,8 +28,7 @@ interface AppState {
     [key: string]: any; // set index signatures to strings
     location: string;
     radius: number;
-    categories: Array<String>;
-    limit: number;
+    categories: Array<string>;
     sort_by: string;
     price: Range;
     open_at?: number;
@@ -49,7 +48,6 @@ class App extends Component<AppState> {
       location: "",
       radius: 5, // measured in kilometers
       categories: [], // always include restaurant
-      limit: 20, // # of results to display
       sort_by: "best_match",
       price: { start: 1, end: 2 }, // price range (1-cheap, 4-expensive)
       // open_now: true
@@ -101,9 +99,10 @@ class App extends Component<AppState> {
         if (query.radius) paramString += Math.round(query.radius * 1000);
       } else if (param === "categories") {
         if (query.categories) {
-          const cat: Array<String> = [];
+          const cat: Array<string> = [];
           for (let category of query.categories) {
-            cat.push(toCategoryValue(category));
+            const categoryValue = toCategoryValue(category);
+            if (categoryValue) cat.push(categoryValue);
           }
           paramString += cat.join(",");
         }
@@ -119,6 +118,7 @@ class App extends Component<AppState> {
       }
       queryString += paramString + "&";
     }
+    queryString += "limit=10";
 
     // send request to proxy server
     this.getRestaurants(

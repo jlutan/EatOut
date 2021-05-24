@@ -1,4 +1,8 @@
-const categories = {
+interface Categories {
+  [key: string]: string;
+}
+
+const categories: Categories = {
   All: "all",
   "Acai Bowls": "acaibowls",
   Bagels: "bagels",
@@ -60,8 +64,9 @@ const getCategories = () => {
   return Object.keys(categories);
 };
 
-const toCategoryValue = (category) => {
+const toCategoryValue = (category: string): string | null => {
   if (category in categories) return categories[category];
+  else return null;
 };
 
 const getSorts = () => {

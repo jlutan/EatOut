@@ -30,21 +30,20 @@ export interface InputFormProps {
   onSliderChange: (event: any) => void;
   onRangeChange: (event: any) => void;
   // form state
-  sorts: Array<{ label: String; value: String }>;
-  categoryList: Array<String>;
+  sorts: Array<{ label: string; value: string }>;
+  categoryList: Array<string>;
   query: {
-    location: String;
+    location: string;
     radius: number;
-    categories: Array<String>;
-    limit: number;
-    sort_by: String;
+    categories: Array<string>;
+    sort_by: string;
     price: Range;
   };
 }
 
 const InputForm: FunctionComponent<InputFormProps> = (props) => {
   // query values
-  const { location, radius, categories, limit, sort_by, price } = props.query;
+  const { location, radius, categories, sort_by, price } = props.query;
   // event handlers
   const {
     handleSubmit,
@@ -98,19 +97,6 @@ const InputForm: FunctionComponent<InputFormProps> = (props) => {
                 onChange={onMultiSelectChange}
                 value={categories}
               />
-            </div>
-            <div className="mb-3">
-              <Field
-                name="limit"
-                component={NumericTextBox}
-                onChange={onNumberChange}
-                value={limit}
-                defaultValue={20}
-                min={1}
-                max={50}
-                step={1}
-                label="Result Limit"
-              ></Field>
             </div>
             <div className="mb-3">
               <Label editorId="sort_by">Sort By</Label>
