@@ -1,15 +1,7 @@
 import React, { FunctionComponent } from "react";
 import { Form, Field, FormElement } from "@progress/kendo-react-form";
-import { Label, Error } from "@progress/kendo-react-labels";
-import {
-  Input,
-  NumericTextBox,
-  RadioGroup,
-} from "@progress/kendo-react-inputs";
-import {
-  TimePicker,
-  TimePickerChangeEvent,
-} from "@progress/kendo-react-dateinputs";
+import { Label } from "@progress/kendo-react-labels";
+import { Input, RadioGroup } from "@progress/kendo-react-inputs";
 import {
   MultiSelect,
   MultiSelectChangeEvent,

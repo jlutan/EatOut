@@ -2,6 +2,9 @@
 
 A web application for locating restaurants with indoor dining, outdoor dining, delivery and takeout service options near a given location. Support restaurants struggling through the pandemic! All business data is from the Yelp database and API.
 
+Try out the live demo!
+[Eat Out Demo](https://eat-out-restaurants.netlify.app/)
+
 ## Development
 
 Steps:

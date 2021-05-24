@@ -57,11 +57,18 @@ const RestaurantEntry: FunctionComponent<RestaurantEntryProps> = (props) => {
               : `${Math.round(distance)} meters`}
           </div>
           <div className="rating">
-            <img src={"yelp-assets/stars/" + getRatingAsset(rating)} />
+            <img
+              src={"yelp-assets/stars/" + getRatingAsset(rating)}
+              alt="Yelp rating"
+            />
             {review_count && ` ${rating} (Based on ${review_count} reviews)`}
           </div>
           {location && <div>{location.address1}</div>}
-          {display_phone && <div>{display_phone}</div>}
+          {display_phone ? (
+            <div>{display_phone}</div>
+          ) : (
+            phone && <div>{phone}</div>
+          )}
           {url && (
             <a
               className="business-page-link"
@@ -70,7 +77,7 @@ const RestaurantEntry: FunctionComponent<RestaurantEntryProps> = (props) => {
               target="_blank"
               rel="noreferrer noopener"
             >
-              <img src="yelp-assets/Burst.svg"></img>
+              <img src="yelp-assets/Burst.svg" alt="Yelp burst logo" />
               <div>
                 <div>Yelp</div>
                 <div className="lighter-text">Read more on Yelp</div>
