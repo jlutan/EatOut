@@ -15,6 +15,7 @@ import {
   MultiSelectChangeEvent,
 } from "@progress/kendo-react-dropdowns";
 import { Button } from "@progress/kendo-react-buttons";
+import { Ripple } from "@progress/kendo-react-ripple";
 import { CustomSlider, CustomRangeSlider } from "./sliders";
 import { Range } from "../App";
 
@@ -142,28 +143,32 @@ const InputForm: FunctionComponent<InputFormProps> = (props) => {
             </div>
             <div className="form-field">
               <Label editorId="sort_by">Sort By</Label>
-              <Field
-                name="sort_by"
-                hint={"Choose the sort for the results."}
-                component={RadioGroup}
-                disabled={false}
-                onChange={onSortChange}
-                defaultValue={sorts[0].value}
-                value={sort_by}
-                data={sorts}
-                label="Sort By"
-              ></Field>
+              <Ripple>
+                <Field
+                  name="sort_by"
+                  hint={"Choose the sort for the results."}
+                  component={RadioGroup}
+                  disabled={false}
+                  onChange={onSortChange}
+                  defaultValue={sorts[0].value}
+                  value={sort_by}
+                  data={sorts}
+                  label="Sort By"
+                ></Field>
+              </Ripple>
             </div>
           </fieldset>
           <div className="k-form-buttons">
-            <Button
-              look="default"
-              primary={true}
-              type="submit"
-              className="k-button"
-            >
-              Search Restaurants
-            </Button>
+            <Ripple>
+              <Button
+                look="default"
+                primary={true}
+                type="submit"
+                className="k-button"
+              >
+                Search Restaurants
+              </Button>
+            </Ripple>
           </div>
         </FormElement>
       )}

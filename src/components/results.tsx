@@ -19,6 +19,7 @@ import {
 import RestaurantEntry from "./restaurantentry";
 import { ResultsType } from "../yelp-lib";
 import { Button } from "@progress/kendo-react-buttons";
+import { Ripple } from "@progress/kendo-react-ripple";
 
 import "./styles/results.css";
 
@@ -42,12 +43,22 @@ import "./styles/results.css";
 */
 
 const initialFilter: CompositeFilterDescriptor = {
-  logic: "and",
+  logic: "or",
   filters: [
     {
       field: "transactions",
       operator: "contains",
       value: "restaurant_reservation",
+    },
+    {
+      field: "transactions",
+      operator: "contains",
+      value: "pickup",
+    },
+    {
+      field: "transactions",
+      operator: "contains",
+      value: "delivery",
     },
   ],
 };
@@ -98,14 +109,12 @@ const Results: FunctionComponent<ResultsProps> = ({
   const Footer: FunctionComponent = () => {
     return (
       <ListViewFooter className="pl-3 pr-3 pt-2 pb-2">
-        <div>
-          <Pager
-            skip={skip}
-            take={take}
-            onPageChange={handlePageChange}
-            total={filteredData.length}
-          />
-        </div>
+        <Pager
+          skip={skip}
+          take={take}
+          onPageChange={handlePageChange}
+          total={filteredData.length}
+        />
         <div className="batch-buttons">
           <Button
             look="flat"
@@ -134,24 +143,26 @@ const Results: FunctionComponent<ResultsProps> = ({
 
   return (
     <React.Fragment>
-      <Filter
-        value={filter}
-        onChange={onFilterChange}
-        fields={[
-          {
-            name: "transactions",
-            label: "Transactions",
-            filter: TextFilter,
-            operators: Operators.text,
-          },
-        ]}
-      />
-      <ListView
-        header={Header}
-        footer={Footer}
-        data={filteredData.slice(skip, skip + take)}
-        item={RestaurantEntry}
-      />
+      <Ripple>
+        <Filter
+          value={filter}
+          onChange={onFilterChange}
+          fields={[
+            {
+              name: "transactions",
+              label: "Transactions",
+              filter: TextFilter,
+              operators: Operators.text,
+            },
+          ]}
+        />
+        <ListView
+          header={Header}
+          footer={Footer}
+          data={filteredData.slice(skip, skip + take)}
+          item={RestaurantEntry}
+        />
+      </Ripple>
     </React.Fragment>
   );
 };

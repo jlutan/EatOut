@@ -1,23 +1,20 @@
-.restaurant-entry {
-  padding: 0.6rem;
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
+.k-card {
   align-items: center;
-  border: solid thin #cccccc;
 }
 
-.restaurant-entry img {
-  border-radius: 30px;
+.k-card-image {
+  margin: 0.75rem;
+  border-radius: 20px;
+  max-width: 256px !important;
+  width: 40%;
+  max-height: 180px;
 }
 
-.restaurant-entry .info {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: flex-start;
+.k-card-body {
+  margin: 0 0.5rem;
+  color: #575757;
 }
 
-.restaurant-entry .info * {
-  margin: 0;
+.k-progressbar {
+  max-width: 90px;
 }

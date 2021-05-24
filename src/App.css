@@ -1,9 +1,29 @@
-.App {
+#App {
+  display: inline-block;
+  width: 100%;
+  max-width: 768px;
   text-align: center;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
+}
+
+h1.title {
+  font-size: 4rem;
+  font-variant: small-caps;
+  background: linear-gradient(
+    135deg,
+    rgba(156, 11, 11, 1) 0%,
+    rgba(62, 88, 212, 1) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+h2.subtitle {
+  font-size: 1.5rem;
+  color: #353535;
 }
 
 body {

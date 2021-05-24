@@ -19,9 +19,10 @@ import Results from "./components/results";
 
 import "./App.css";
 
-// WARNING: bad practice
-const YELP_API_TOKEN: String =
+// yes, I know this is bad
+const YELP_API_TOKEN: string =
   "5cSbPPrTn0Gr0446_jXm8UakTo0XTmr7xheg_VMBJ143tkLylG9Uri800onLWiHv9BZHRlwKSjgv2rzv4mTIsX4I2d5qXBLBQYp7Ado-cwj-VbqBx5keAQwEJLWhYHYx";
+const cors_anywhere_url: string = "https://cors-anywhere.herokuapp.com/";
 
 export interface Range {
   start: number;
@@ -125,7 +126,7 @@ class App extends Component<AppState> {
 
     // send to proxy server to allow cross-site access
     getRestaurants(
-      `https://cors-anywhere.herokuapp.com/api.yelp.com/v3/businesses/search?${queryString}`
+      `${cors_anywhere_url}api.yelp.com/v3/businesses/search?${queryString}`
     )
       .then(
         (value) => {
@@ -287,7 +288,15 @@ class App extends Component<AppState> {
 
   render() {
     return (
-      <div className="App">
+      <div id="App">
+        <h1 className="title">Eat Out</h1>
+        <h2 className="subtitle">Find restaurants open for dining near you!</h2>
+        <img
+          src="eat-out-logo.png"
+          width="256"
+          alt="Eat Out Icon"
+          title="Eat Out Icon"
+        ></img>
         {this.state.status === 2 ? (
           <Results
             result={this.state.result}

@@ -1,3 +1,21 @@
-ListView {
+.k-listview-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.k-pager {
   width: 100%;
+}
+
+.batch-buttons {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  max-width: 329px;
+  width: 100%;
+}
+
+.batch-buttons * {
+  margin: 0 0.6rem;
 }

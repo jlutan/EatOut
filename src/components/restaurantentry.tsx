@@ -1,4 +1,12 @@
 import React, { FunctionComponent } from "react";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardBody,
+  CardImage,
+} from "@progress/kendo-react-layout";
+import { ChunkProgressBar } from "@progress/kendo-react-progressbars";
 import "./styles/restaurantentry.css";
 
 export interface RestaurantEntryProps {
@@ -34,28 +42,33 @@ const RestaurantEntry: FunctionComponent<RestaurantEntryProps> = (props) => {
   } = props.dataItem;
 
   return (
-    <div className="restaurant-entry">
-      <div className="info">
-        <div>{name}</div>
-        <div>{Math.round(distance)} meters</div>
-        <div>
-          Rating: {rating}{" "}
-          {review_count ? "(" + review_count + "reviews)" : null} - {price}
-        </div>
-        {location ? <div>{location.address1}</div> : null}
-        {display_phone ? (
-          <div>{display_phone}</div>
-        ) : phone ? (
-          <div>{phone}</div>
-        ) : null}
-        {url ? (
-          <a href={url} target="_blank">
-            {name}'s Website
-          </a>
-        ) : null}
+    <Card orientation="horizontal">
+      <CardImage src={image_url} />
+      <div className="k-vbox">
+        <CardHeader>
+          <CardTitle>{name}</CardTitle>
+        </CardHeader>
+        <CardBody>
+          <div>{Math.round(distance)} meters</div>
+          <div>
+            Rating: {rating}{" "}
+            <ChunkProgressBar
+              value={rating * 20}
+              progressStyle={{ background: "#f0e396" }}
+              emptyStyle={{ background: "#ededed" }}
+            />
+            {review_count && " (" + review_count + " reviews)"} - {price}
+          </div>
+          {location && <div>{location.address1}</div>}
+          {display_phone && <div>{display_phone}</div>}
+          {url && (
+            <a href={url} target="_blank">
+              {name} Website
+            </a>
+          )}
+        </CardBody>
       </div>
-      <img width="128px" src={image_url} title={name} alt="No Image" />
-    </div>
+    </Card>
   );
 };
 
