@@ -7,6 +7,7 @@ import {
   NumericTextBoxChangeEvent,
   RadioGroupChangeEvent,
 } from "@progress/kendo-react-inputs";
+import { TimePickerChangeEvent } from "@progress/kendo-react-dateinputs";
 import { MultiSelectChangeEvent } from "@progress/kendo-react-dropdowns";
 import {
   ResultsType,
@@ -27,8 +28,10 @@ export interface Range {
   end: number;
 }
 
+type AppStatus = 0 | 1 | 2; // 0 - no data, 1 - request in progress, 2 - request done and ready
+
 interface AppState {
-  status: number; // 0 - no data ready, 1 - request in progress, 2 - request done and ready
+  status: AppStatus;
   query: {
     [key: string]: any; // set index signatures to strings
     location: string;
@@ -36,10 +39,10 @@ interface AppState {
     categories: Array<string>;
     sort_by: string;
     price: Range;
-    open_at?: number;
-    open_now?: boolean;
+    open_at: number;
   };
   result: ResultsType;
+  batch: number;
 }
 
 class App extends Component<AppState> {
@@ -47,8 +50,9 @@ class App extends Component<AppState> {
     status: 0,
     query: {
       location: "",
+      open_at: 20,
       radius: 5, // measured in kilometers
-      categories: [], // always include restaurant
+      categories: ["All"], // always include restaurant
       sort_by: "best_match",
       price: { start: 1, end: 2 }, // price range (1-cheap, 4-expensive)
       // open_now: true
@@ -57,21 +61,92 @@ class App extends Component<AppState> {
       total: 0,
       businesses: [],
     },
+    batch: 0,
   };
 
-  // defines a GET request to the Yelp API
-  getRestaurants = async (url: RequestInfo): Promise<JSON> => {
-    // calling the fetch API
-    const response = await fetch(url, {
-      method: "GET",
-      mode: "cors",
-      cache: "no-cache",
-      credentials: "same-origin",
-      headers: {
-        Authorization: `Bearer ${YELP_API_TOKEN}`,
-      },
-    });
-    return response.json();
+  sendYelpAPIRequest = (batch: number): void => {
+    // generate yelp API query string based on current state
+    const generateQueryString = (): string => {
+      const query = { ...this.state.query };
+
+      let queryString = "";
+      for (const param in query) {
+        let paramString = param.toString() + "=";
+        if (query && param === "price") {
+          if (query.price) {
+            const prices: Array<Number> = [];
+            for (let i = query.price.start; i <= query.price.end; i++) {
+              prices.push(i);
+            }
+            paramString += prices.join(",");
+          }
+        } else if (param === "radius") {
+          if (query.radius) paramString += Math.round(query.radius * 1000);
+        } else if (param === "categories") {
+          if (query.categories) {
+            const cat: Array<string> = [];
+            for (let category of query.categories) {
+              const categoryValue = toCategoryValue(category);
+              if (categoryValue) cat.push(categoryValue);
+            }
+            paramString += cat.join(",");
+          }
+        } else if (typeof query[param] === "string") {
+          const tokens = query[param].split(" ");
+          if (tokens.length > 1) {
+            paramString += '"' + tokens.join(" ") + '"';
+          } else {
+            paramString += query[param];
+          }
+        } else {
+          paramString += query[param];
+        }
+        queryString += paramString + "&";
+      }
+      queryString += `limit=50&offset=${Math.max(batch - 1) * 50}`;
+      return queryString;
+    };
+    const queryString = generateQueryString();
+
+    // defines a GET request to the Yelp API
+    const getRestaurants = async (url: RequestInfo): Promise<JSON> => {
+      // calling the fetch API
+      const response = await fetch(url, {
+        method: "GET",
+        mode: "cors",
+        cache: "no-cache",
+        credentials: "same-origin",
+        headers: {
+          Authorization: `Bearer ${YELP_API_TOKEN}`,
+        },
+      });
+      return response.json();
+    };
+
+    // send to proxy server to allow cross-site access
+    getRestaurants(
+      `https://cors-anywhere.herokuapp.com/api.yelp.com/v3/businesses/search?${queryString}`
+    )
+      .then(
+        (value) => {
+          this.setState({
+            status: 2,
+            result: value as unknown as ResultsType,
+          });
+        },
+        (reason) => {
+          console.log(reason);
+          this.setState({ status: 0, result: null, batch: 0 });
+        }
+      )
+      .catch((reason) => {
+        console.log(reason);
+        this.setState({ status: 0, result: null, batch: 0 });
+      });
+  };
+
+  getUnixTimeStamp = (dateTime: string): void => {
+    // TODO
   };
 
   /* Event Handlers */
@@ -83,61 +158,9 @@ class App extends Component<AppState> {
   ): Promise<void> => {
     if (typeof event !== "undefined") event.preventDefault();
 
-    const query = { ...this.state.query };
+    this.sendYelpAPIRequest(1);
 
-    let queryString = "";
-    for (const param in query) {
-      let paramString = param.toString() + "=";
-      if (query && param === "price") {
-        if (query.price) {
-          const prices: Array<Number> = [];
-          for (let i = query.price.start; i <= query.price.end; i++) {
-            prices.push(i);
-          }
-          paramString += prices.join(",");
-        }
-      } else if (param === "radius") {
-        if (query.radius) paramString += Math.round(query.radius * 1000);
-      } else if (param === "categories") {
-        if (query.categories) {
-          const cat: Array<string> = [];
-          for (let category of query.categories) {
-            const categoryValue = toCategoryValue(category);
-            if (categoryValue) cat.push(categoryValue);
-          }
-          paramString += cat.join(",");
-        }
-      } else if (typeof query[param] === "string") {
-        const tokens = query[param].split(" ");
-        if (tokens.length > 1) {
-          paramString += '"' + tokens.join(" ") + '"';
-        } else {
-          paramString += query[param];
-        }
-      } else {
-        paramString += query[param];
-      }
-      queryString += paramString + "&";
-    }
-    queryString += "limit=10";
-
-    // send request to proxy server
-    this.getRestaurants(
-      `https://cors-anywhere.herokuapp.com/api.yelp.com/v3/businesses/search?${queryString}`
-    )
-      .then(
-        (value) => {
-          this.setState({ status: 2, result: value as unknown as ResultsType });
-        },
-        (reason) => {
-          console.log(reason);
-          this.setState({ status: 0 });
-        }
-      )
-      .catch((reason) => {
-        console.log(reason);
-        this.setState({ status: 0 });
-      });
+    if (this.state.batch === 0) this.setState({ batch: 1 });
     // if (this.xhttp.withCredentials) {
     //   // initialize the request
     //   this.xhttp.open(
@@ -205,11 +228,50 @@ class App extends Component<AppState> {
     this.setState({ query });
   };
 
+  onTimeChange = (e: TimePickerChangeEvent): void => {
+    const query = { ...this.state.query };
+    if (e.target.props.name) {
+      query[e.target.props.name] = this.getUnixTimeStamp(
+        e.value?.toString() as string
+      );
+    }
+    this.setState({ query });
+  };
+
+  // generate previous batch of Yelp results
+  onPrevBatch = (): void => {
+    if (this.state.status === 2) {
+      this.sendYelpAPIRequest(this.state.batch - 1);
+      this.setState({ batch: this.state.batch - 1 });
+    }
+  };
+
+  // generate next batch of Yelp results
+  onNextBatch = (): void => {
+    if (this.state.status === 2) {
+      this.sendYelpAPIRequest(this.state.batch + 1);
+      this.setState({ batch: this.state.batch + 1 });
+    }
+  };
+
+  onBack = (): void => {
+    if (this.state.status !== 0) {
+      this.setState({ status: 0, result: null, batch: 0 });
+    }
+  };
+
   render() {
     return (
       <div className="App">
         {this.state.status === 2 ? (
-          <Results result={this.state.result} />
+          <Results
+            result={this.state.result}
+            batch={this.state.batch}
+            location={this.state.query.location}
+            onPrevBatch={this.onPrevBatch}
+            onNextBatch={this.onNextBatch}
+            onBack={this.onBack}
+          />
         ) : (
           <InputForm
             handleSubmit={this.handleSubmit}
@@ -219,6 +281,7 @@ class App extends Component<AppState> {
             onMultiSelectChange={this.onMultiSelectChange}
             onSliderChange={this.onSliderChange}
             onRangeChange={this.onRangeChange}
+            onTimeChange={this.onTimeChange}
             sorts={getSorts()}
             categoryList={getCategories()}
             query={this.state.query}

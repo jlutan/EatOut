@@ -7,6 +7,10 @@ import {
   RadioGroup,
 } from "@progress/kendo-react-inputs";
 import {
+  TimePicker,
+  TimePickerChangeEvent,
+} from "@progress/kendo-react-dateinputs";
+import {
   MultiSelect,
   MultiSelectChangeEvent,
 } from "@progress/kendo-react-dropdowns";
@@ -29,6 +33,7 @@ export interface InputFormProps {
   onMultiSelectChange: (event: MultiSelectChangeEvent) => void;
   onSliderChange: (event: any) => void;
   onRangeChange: (event: any) => void;
+  onTimeChange: (event: TimePickerChangeEvent) => void;
   // form state
   sorts: Array<{ label: string; value: string }>;
   categoryList: Array<string>;
@@ -38,12 +43,13 @@ export interface InputFormProps {
     categories: Array<string>;
     sort_by: string;
     price: Range;
+    open_at: number;
   };
 }
 
 const InputForm: FunctionComponent<InputFormProps> = (props) => {
   // query values
-  const { location, radius, categories, sort_by, price } = props.query;
+  const { location, open_at, radius, categories, sort_by, price } = props.query;
   // event handlers
   const {
     handleSubmit,
@@ -53,6 +59,7 @@ const InputForm: FunctionComponent<InputFormProps> = (props) => {
     onMultiSelectChange,
     onSliderChange,
     onRangeChange,
+    onTimeChange,
     categoryList,
     sorts,
   } = props;
@@ -67,11 +74,20 @@ const InputForm: FunctionComponent<InputFormProps> = (props) => {
             <div className="mb-3">
               <Field
                 autoFocus
+                label="Location (City, Street, Zip code, etc.)"
                 name="location"
                 onChange={onTextChange}
                 value={location}
                 component={Input}
-                label="Location (City, Street, Zip code, etc.)"
+              />
+            </div>
+            <div className="mb-3">
+              <Field
+                label="Open At"
+                name="open_at"
+                onChange={onTimeChange}
+                value={open_at}
+                component={TimePicker}
               />
             </div>
             <div className="mb-3">
@@ -99,19 +115,6 @@ const InputForm: FunctionComponent<InputFormProps> = (props) => {
               />
             </div>
             <div className="mb-3">
-              <Label editorId="sort_by">Sort By</Label>
-              <Field
-                name="sort_by"
-                component={RadioGroup}
-                disabled={false}
-                onChange={onSortChange}
-                defaultValue={sorts[0].value}
-                value={sort_by}
-                data={sorts}
-                label="Sort By"
-              ></Field>
-            </div>
-            <div className="mb-3">
               <Label editorId="price">Price</Label>
               <Field
                 id="price"
@@ -127,10 +130,23 @@ const InputForm: FunctionComponent<InputFormProps> = (props) => {
                 positions={[1, 2, 3, 4]}
               ></Field>
             </div>
+            <div className="mb-3">
+              <Label editorId="sort_by">Sort By</Label>
+              <Field
+                name="sort_by"
+                component={RadioGroup}
+                disabled={false}
+                onChange={onSortChange}
+                defaultValue={sorts[0].value}
+                value={sort_by}
+                data={sorts}
+                label="Sort By"
+              ></Field>
+            </div>
           </fieldset>
           <div className="k-form-buttons">
             <button type="submit" className="k-button">
-              Submit
+              Search Restaurants
             </button>
           </div>
         </FormElement>
