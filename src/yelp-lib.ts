@@ -270,4 +270,29 @@ const getSorts = () => {
   ];
 };
 
-export { getSorts, getCategories, toCategoryValue };
+const getRatingAsset = (rating: number): string => {
+  switch (rating) {
+    case 1:
+      return "regular_1.png";
+    case 1.5:
+      return "regular_1_half.png";
+    case 2:
+      return "regular_2.png";
+    case 2.5:
+      return "regular_2_half.png";
+    case 3:
+      return "regular_3.png";
+    case 3.5:
+      return "regular_3_half.png";
+    case 4:
+      return "regular_4.png";
+    case 4.5:
+      return "regular_4_half.png";
+    case 5:
+      return "regular_5.png";
+    default:
+      return "regular_0.png";
+  }
+};
+
+export { getSorts, getCategories, toCategoryValue, getRatingAsset };

@@ -166,7 +166,7 @@ const InputForm: FunctionComponent<InputFormProps> = (props) => {
                 type="submit"
                 className="k-button"
               >
-                Search Restaurants
+                Search for Restaurants
               </Button>
             </Ripple>
           </div>

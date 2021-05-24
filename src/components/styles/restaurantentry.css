@@ -1,4 +1,7 @@
 .k-card {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
   align-items: center;
 }
 
@@ -13,8 +16,44 @@
 .k-card-body {
   margin: 0 0.5rem;
   color: #575757;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-.k-progressbar {
-  max-width: 90px;
+.rating {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.rating img {
+  margin-right: 0.45rem;
+}
+
+/* Link behavior */
+.business-page-link {
+  width: 160px;
+  margin-top: 0.4rem;
+  border: solid thin #777777;
+  border-radius: 20px;
+  padding: 0.35rem;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-end;
+  text-decoration: none;
+}
+.business-page-link div {
+  color: #777777;
+}
+.business-page-link div.lighter-text {
+  color: #a0a0a0;
+}
+.business-page-link img {
+  width: 32px;
+}
+.business-page-link:hover {
+  transform: scale(1.2);
 }

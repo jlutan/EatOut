@@ -6,7 +6,7 @@ import {
   CardBody,
   CardImage,
 } from "@progress/kendo-react-layout";
-import { ChunkProgressBar } from "@progress/kendo-react-progressbars";
+import { getRatingAsset } from "../yelp-lib";
 import "./styles/restaurantentry.css";
 
 export interface RestaurantEntryProps {
@@ -49,21 +49,32 @@ const RestaurantEntry: FunctionComponent<RestaurantEntryProps> = (props) => {
           <CardTitle>{name}</CardTitle>
         </CardHeader>
         <CardBody>
-          <div>{Math.round(distance)} meters</div>
+          <div>Price - {price}</div>
           <div>
-            Rating: {rating}{" "}
-            <ChunkProgressBar
-              value={rating * 20}
-              progressStyle={{ background: "#f0e396" }}
-              emptyStyle={{ background: "#ededed" }}
-            />
-            {review_count && " (" + review_count + " reviews)"} - {price}
+            Distance -{" "}
+            {distance > 1000
+              ? `${(distance / 1000).toPrecision(3)} kilometers`
+              : `${Math.round(distance)} meters`}
+          </div>
+          <div className="rating">
+            <img src={"yelp-assets/stars/" + getRatingAsset(rating)} />
+            {review_count && ` ${rating} (Based on ${review_count} reviews)`}
           </div>
           {location && <div>{location.address1}</div>}
           {display_phone && <div>{display_phone}</div>}
           {url && (
-            <a href={url} target="_blank">
-              {name} Website
+            <a
+              className="business-page-link"
+              role="button"
+              href={url}
+              target="_blank"
+              rel="noreferrer noopener"
+            >
+              <img src="yelp-assets/Burst.svg"></img>
+              <div>
+                <div>Yelp</div>
+                <div className="lighter-text">Read more on Yelp</div>
+              </div>
             </a>
           )}
         </CardBody>

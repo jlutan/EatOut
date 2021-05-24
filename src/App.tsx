@@ -289,14 +289,16 @@ class App extends Component<AppState> {
   render() {
     return (
       <div id="App">
-        <h1 className="title">Eat Out</h1>
+        <h1 className="title">
+          Eat Out{" "}
+          <img
+            src="eat-out-logo.png"
+            width="256"
+            alt="Eat Out Icon"
+            title="Eat Out Icon"
+          ></img>
+        </h1>
         <h2 className="subtitle">Find restaurants open for dining near you!</h2>
-        <img
-          src="eat-out-logo.png"
-          width="256"
-          alt="Eat Out Icon"
-          title="Eat Out Icon"
-        ></img>
         {this.state.status === 2 ? (
           <Results
             result={this.state.result}
