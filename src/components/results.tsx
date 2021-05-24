@@ -34,6 +34,13 @@ import "./styles/results.css";
   contains - contains substring
 */
 
+/*
+  Transaction values include:
+  restaurant-reservation
+  pickup
+  delivery
+*/
+
 const initialFilter: CompositeFilterDescriptor = {
   logic: "and",
   filters: [

@@ -39,7 +39,7 @@ interface AppState {
     categories: Array<string>;
     sort_by: string;
     price: Range;
-    open_at: number;
+    // open_at: number;
   };
   result: ResultsType;
   batch: number;
@@ -50,7 +50,7 @@ class App extends Component<AppState> {
     status: 0,
     query: {
       location: "",
-      open_at: 20,
+      // open_at: 0,
       radius: 5, // measured in kilometers
       categories: ["All"], // always include restaurant
       sort_by: "best_match",
@@ -146,7 +146,33 @@ class App extends Component<AppState> {
   };
 
   getUnixTimeStamp = (dateTime: string): void => {
-    // TODO
+    const getResponse = async (url: string): Promise<string> => {
+      const response = await fetch(url, {
+        method: "GET",
+        mode: "cors",
+        cache: "no-cache",
+        credentials: "same-origin",
+      });
+      return response.text();
+    };
+    const generateQueryString = (): string => {
+      const tokens = dateTime.split(" ");
+      const date = tokens.slice(0, 3).join(" ");
+      const time = tokens[3];
+      return `date=${date} ${time}`;
+    };
+    const queryString = generateQueryString();
+
+    getResponse(
+      `https://showcase.api.linx.twenty57.net/UnixTime/tounix?${queryString}`
+    )
+      .then((value) => {
+        const query = { ...this.state.query };
+        console.log(value);
+        query.open_at = Number.parseInt(value, 10).valueOf();
+        this.setState({ query });
+      })
+      .catch((reason) => console.error(reason));
   };
 
   /* Event Handlers */
@@ -235,7 +261,6 @@ class App extends Component<AppState> {
         e.value?.toString() as string
       );
     }
-    this.setState({ query });
   };
 
   // generate previous batch of Yelp results
@@ -276,12 +301,10 @@ class App extends Component<AppState> {
           <InputForm
             handleSubmit={this.handleSubmit}
             onTextChange={this.onTextChange}
-            onNumberChange={this.onNumberChange}
             onSortChange={this.onSortChange}
             onMultiSelectChange={this.onMultiSelectChange}
             onSliderChange={this.onSliderChange}
             onRangeChange={this.onRangeChange}
-            onTimeChange={this.onTimeChange}
             sorts={getSorts()}
             categoryList={getCategories()}
             query={this.state.query}

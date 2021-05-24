@@ -14,6 +14,7 @@ import {
   MultiSelect,
   MultiSelectChangeEvent,
 } from "@progress/kendo-react-dropdowns";
+import { Button } from "@progress/kendo-react-buttons";
 import { CustomSlider, CustomRangeSlider } from "./sliders";
 import { Range } from "../App";
 
@@ -28,12 +29,10 @@ export interface InputFormProps {
     event?: React.SyntheticEvent<any, Event> | undefined
   ) => void;
   onTextChange: (event: any) => void;
-  onNumberChange: (event: any) => void;
   onSortChange: (event: any) => void;
   onMultiSelectChange: (event: MultiSelectChangeEvent) => void;
   onSliderChange: (event: any) => void;
   onRangeChange: (event: any) => void;
-  onTimeChange: (event: TimePickerChangeEvent) => void;
   // form state
   sorts: Array<{ label: string; value: string }>;
   categoryList: Array<string>;
@@ -43,26 +42,32 @@ export interface InputFormProps {
     categories: Array<string>;
     sort_by: string;
     price: Range;
-    open_at: number;
+    // open_at: number;
   };
 }
 
 const InputForm: FunctionComponent<InputFormProps> = (props) => {
   // query values
-  const { location, open_at, radius, categories, sort_by, price } = props.query;
+  const { location, radius, categories, sort_by, price } = props.query;
   // event handlers
   const {
     handleSubmit,
     onTextChange,
-    onNumberChange,
     onSortChange,
     onMultiSelectChange,
     onSliderChange,
     onRangeChange,
-    onTimeChange,
     categoryList,
     sorts,
   } = props;
+
+  const locationValidator = (): string => {
+    return location.length > 0 ? "" : "Please enter a location.";
+  };
+
+  // const timeValidator = (): string => {
+  //   return open_at !== 0 ? "" : "Please choose an opening time.";
+  // };
 
   return (
     <Form
@@ -71,26 +76,29 @@ const InputForm: FunctionComponent<InputFormProps> = (props) => {
         <FormElement>
           <fieldset className="k-form-fieldset">
             <legend className="k-form-legend">Describe your search:</legend>
-            <div className="mb-3">
+            <div className="form-field">
               <Field
                 autoFocus
                 label="Location (City, Street, Zip code, etc.)"
                 name="location"
                 onChange={onTextChange}
                 value={location}
+                defaultValue={location}
+                validator={locationValidator}
                 component={Input}
               />
             </div>
-            <div className="mb-3">
+            {/* <div className="form-field">
               <Field
-                label="Open At"
+                label="Open Time"
                 name="open_at"
                 onChange={onTimeChange}
                 value={open_at}
+                validator={timeValidator}
                 component={TimePicker}
               />
-            </div>
-            <div className="mb-3">
+            </div> */}
+            <div className="form-field">
               <Label editorId="radius">Search Radius (in km)</Label>
               <Field
                 name="radius"
@@ -104,9 +112,11 @@ const InputForm: FunctionComponent<InputFormProps> = (props) => {
                 positions={[1, 5, 10, 20, 30, 40]}
               ></Field>
             </div>
-            <div className="mb-3">
+            <div className="form-field">
               <MultiSelect
                 label="Categories"
+                valid={categories.length > 0}
+                validationMessage="Please choose at least one category."
                 name="categories"
                 allowCustom={true}
                 data={categoryList}
@@ -114,7 +124,7 @@ const InputForm: FunctionComponent<InputFormProps> = (props) => {
                 value={categories}
               />
             </div>
-            <div className="mb-3">
+            <div className="form-field">
               <Label editorId="price">Price</Label>
               <Field
                 id="price"
@@ -130,10 +140,11 @@ const InputForm: FunctionComponent<InputFormProps> = (props) => {
                 positions={[1, 2, 3, 4]}
               ></Field>
             </div>
-            <div className="mb-3">
+            <div className="form-field">
               <Label editorId="sort_by">Sort By</Label>
               <Field
                 name="sort_by"
+                hint={"Choose the sort for the results."}
                 component={RadioGroup}
                 disabled={false}
                 onChange={onSortChange}
@@ -145,9 +156,14 @@ const InputForm: FunctionComponent<InputFormProps> = (props) => {
             </div>
           </fieldset>
           <div className="k-form-buttons">
-            <button type="submit" className="k-button">
+            <Button
+              look="default"
+              primary={true}
+              type="submit"
+              className="k-button"
+            >
               Search Restaurants
-            </button>
+            </Button>
           </div>
         </FormElement>
       )}
